@@ -1,47 +1,43 @@
 <template>
   <li>
-    <button
-      class="outline-none p-4 bg-white rounded transition border-2 border-gray-300 hover:border-blue-400 cursor-pointer relative hover:text-blue-600 focus:text-blue-600 focus:border-blue-400 w-full text-left"
-      @click="goToTask"
+    <article
+      class="group relative flex flex-col gap-1 rounded-control border border-line bg-surface-1 p-3.5 pr-12 shadow-sm transition-all duration-200 ease-out-expo hover:-translate-y-0.5 hover:border-line-strong hover:shadow-card"
     >
-      <h3 class="text font-bold">
-        {{ task.title }}
+      <h3 class="font-semibold leading-snug text-content">
+        <NuxtLink
+          :to="`/kanban/tasks/${task.id}`"
+          class="rounded-control outline-none after:absolute after:inset-0 after:content-[''] group-hover:text-accent"
+        >
+          {{ task.title }}
+        </NuxtLink>
       </h3>
 
-      <p v-if="task.description" class="text-gray-500 text-sm">
+      <p
+        v-if="task.description"
+        class="line-clamp-2 text-sm text-content-muted"
+      >
         {{ task.description }}
       </p>
 
-      <div class="flex absolute right-2 top-2">
-        <button
-          class="cursor-pointer text-gray-500 transition hover:text-red-600 outline-red-400 p-1 focus:text-red-600"
-          role="button"
-          alt="Delete task"
-          @click.stop="reveal"
-        >
-          <IconTrash />
-        </button>
+      <UiIconButton
+        label="Удалить задачу"
+        variant="danger"
+        class="absolute right-1.5 top-1.5 z-10 !h-10 !w-10"
+        @click="reveal"
+      >
+        <IconTrash />
+      </UiIconButton>
+    </article>
 
-        <nuxt-link
-          :to="`/kanban/tasks/${task.id}`"
-          class="p-1 outline-blue-400 focus:text-blue-600 hover:text-blue-600 text-gray-500 transition"
-          role="button"
-          alt="Edit task"
-        >
-          <IconPencilOutline />
-        </nuxt-link>
-      </div>
-
-      <teleport to="body">
-        <ModalConfirm
-          :is-revealed="isRevealed"
-          title="Are you sure to delete this task?"
-          text="You won't be able to undo this action"
-          @confirm="confirm"
-          @cancel="cancel"
-        />
-      </teleport>
-    </button>
+    <teleport to="body">
+      <ModalConfirm
+        :is-revealed="isRevealed"
+        title="Удалить задачу?"
+        text="Это действие нельзя отменить."
+        @confirm="confirm"
+        @cancel="cancel"
+      />
+    </teleport>
   </li>
 </template>
 
@@ -61,8 +57,4 @@ const props = defineProps<{
 onConfirm(() => {
   canbanStore.removeTask(props.stageId, props.task.id)
 })
-
-const goToTask = () => {
-  return navigateTo(`/kanban/tasks/${props.task.id}`)
-}
 </script>

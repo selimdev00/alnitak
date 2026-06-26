@@ -1,81 +1,69 @@
 <template>
-  <div
+  <li
     :data-kanban-stage="stage.id"
-    class="min-w-[400px] bg-red border border-gray-300 rounded flex flex-col transition"
+    class="ledger-card flex w-[86vw] max-w-[340px] shrink-0 snap-start flex-col self-start sm:w-[340px]"
   >
-    <div
-      class="p-4 flex gap-6 justify-between items-center border-b border-gray-300 bg-blue-50"
-    >
-      <div class="flex flex-col gap-1">
-        <div class="flex flex-wrap gap-x-1 items-center text-xs text-gray-500">
-          <span> {{ stage.tasks.length }} tasks </span>
+    <div class="flex items-start justify-between gap-3 p-4">
+      <div class="flex min-w-0 flex-col gap-1.5">
+        <span
+          class="inline-flex w-fit items-center rounded-pill bg-surface-2 px-2.5 py-0.5 text-xs font-medium text-content-muted tnum"
+        >
+          {{ taskCountLabel }}
+        </span>
 
-          <span>|</span>
-
-          <span>
-            Created:
-            {{
-              DateTime.fromISO(stage.created_at).setLocale('en').toRelative()
-            }}
-            ago
-          </span>
-
-          <span>|</span>
-
-          <span>
-            Last updated:
-            {{
-              DateTime.fromISO(stage.updated_at).setLocale('en').toRelative()
-            }}
-            ago
-          </span>
-        </div>
-
-        <form @submit.prevent="saveStage">
+        <form v-if="editing" @submit.prevent="saveStage">
           <input
             ref="stageTitleRef"
             v-model="stageTitle"
             name="stageTitle"
             type="text"
-            class="bg-transparent focus:outline-blue-400 text-xl font-bold cursor-pointer"
+            aria-label="Название этапа"
+            class="w-full rounded-control border border-line-strong bg-bg px-2 py-1 font-display text-lg font-semibold text-content outline-none focus:border-accent"
             @blur="saveStage"
+            @keydown.esc="cancelEdit"
           />
         </form>
+        <h2
+          v-else
+          class="truncate font-display text-lg font-semibold text-content"
+          :title="stage.title"
+        >
+          {{ stage.title }}
+        </h2>
       </div>
 
-      <div class="flex gap-2">
-        <button
-          class="cursor-pointer text-gray-500 transition hover:text-red-600 p-1 outline-red-600 focus:text-red-600"
-          role="button"
-          alt="Delete stage"
+      <div class="flex shrink-0 items-center">
+        <UiIconButton
+          label="Переименовать этап"
+          class="!h-9 !w-9"
+          @click="startEdit"
+        >
+          <IconPencilOutline />
+        </UiIconButton>
+        <UiIconButton
+          label="Удалить этап"
+          variant="danger"
+          class="!h-9 !w-9"
           @click="removeStage"
         >
           <IconTrash />
-        </button>
-
-        <button
-          class="cursor-pointer text-gray-500 transition hover:text-blue-600 p-1 outline-blue-400 focus:text-blue-600"
-          role="button"
-          alt="Edit stage"
-          @click="stageTitleRef?.focus()"
-        >
-          <IconPencilOutline />
-        </button>
+        </UiIconButton>
       </div>
     </div>
 
-    <div class="p-4 flex-1 flex flex-col gap-4 items-center bg-gray-50">
+    <div class="ledger-rule mx-4" />
+
+    <div class="flex flex-1 flex-col gap-4 p-4">
       <transition name="fade" mode="out-in">
-        <div v-if="!addingTask" class="w-full flex flex-col gap-4">
-          <div
-            class="w-full min-h-[80px] relative"
-            :data-stage-dropzone="stage.id"
-          >
+        <div v-if="!addingTask" class="flex flex-col gap-3">
+          <div class="relative min-h-[88px]">
             <draggable
               v-model="stageTasks"
+              tag="ul"
               item-key="id"
               group="tasks"
-              class="flex flex-col gap-2 w-full min-h-[80px]"
+              ghost-class="opacity-50"
+              class="flex min-h-[88px] flex-col gap-2.5"
               @change="onTaskMove"
             >
               <template #item="{ element }">
@@ -88,39 +76,22 @@
               </template>
             </draggable>
 
-            <transition name="fade">
-              <span
-                v-if="stageTasks.length === 0"
-                class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-500 text-sm"
-              >
-                No tasks
-              </span>
-            </transition>
-          </div>
-
-          <div class="flex flex-col gap-4">
-            <div class="h-full flex flex-col gap-2 w-full">
-              <div class="mx-auto">
-                <FormButton
-                  variant="secondary"
-                  role="button"
-                  alt="Add task"
-                  name="Add task"
-                  @click="turnAddingTaskOn"
-                >
-                  <span>Add task</span>
-
-                  <span>
-                    <IconPlusCircle />
-                  </span>
-                </FormButton>
-              </div>
+            <div
+              v-if="stageTasks.length === 0"
+              class="pointer-events-none absolute inset-0 flex items-center justify-center rounded-control border border-dashed border-line-strong px-4 text-center text-sm text-content-subtle"
+            >
+              Перетащите задачу сюда или добавьте новую
             </div>
           </div>
+
+          <FormButton variant="secondary" @click="turnAddingTaskOn">
+            <IconPlusCircle />
+            <span>Добавить задачу</span>
+          </FormButton>
         </div>
 
         <TaskAdd
-          v-else-if="addingTask"
+          v-else
           :stage-id="stage.id"
           @close="turnAddingTaskOff"
         />
@@ -130,18 +101,16 @@
     <teleport to="body">
       <ModalConfirm
         :is-revealed="isRevealed"
-        title="Are you sure to delete this stage?"
-        text="Deleting stage will remove all tasks in this stage"
+        title="Удалить этап?"
+        text="Вместе с этапом удалятся все его задачи."
         @confirm="confirm"
         @cancel="cancel"
       />
     </teleport>
-  </div>
+  </li>
 </template>
 
 <script setup lang="ts">
-import { DateTime } from 'luxon'
-
 import type { Stage, Task } from '~/types/Canban'
 import { useConfirmDialog } from '@vueuse/core'
 
@@ -149,33 +118,56 @@ import draggable from 'vuedraggable'
 
 const { isRevealed, reveal, confirm, cancel, onConfirm } = useConfirmDialog()
 
-const removeStage = () => {
-  reveal()
-}
+const canbanStore = useCanbanStore()
+
+const props = defineProps<{ stage: Stage }>()
+
+const removeStage = () => reveal()
 
 onConfirm(() => {
   canbanStore.removeStage(props.stage.id)
 })
 
-const canbanStore = useCanbanStore()
-
-const props = defineProps<{ stage: Stage }>()
-
 const stageTitle = ref<string>(props.stage.title)
 const stageTitleRef = ref<HTMLInputElement | null>(null)
+const editing = ref<boolean>(false)
 
-const saveStage = () => {
-  canbanStore.updateStageTitle(props.stage.id, stageTitle.value)
-
-  stageTitleRef.value?.blur()
+const startEdit = async () => {
+  stageTitle.value = props.stage.title
+  editing.value = true
+  await nextTick()
+  stageTitleRef.value?.focus()
+  stageTitleRef.value?.select()
 }
 
-const addingTask = ref<boolean>(false)
+const saveStage = () => {
+  if (!editing.value) return
+  const next = stageTitle.value.trim()
+  if (next) canbanStore.updateStageTitle(props.stage.id, next)
+  else stageTitle.value = props.stage.title
+  editing.value = false
+}
 
+const cancelEdit = () => {
+  stageTitle.value = props.stage.title
+  editing.value = false
+}
+
+const taskCountLabel = computed(() => {
+  const n = props.stage.tasks.length
+  const mod10 = n % 10
+  const mod100 = n % 100
+  let word = 'задач'
+  if (mod10 === 1 && mod100 !== 11) word = 'задача'
+  else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20))
+    word = 'задачи'
+  return `${n} ${word}`
+})
+
+const addingTask = ref<boolean>(false)
 const turnAddingTaskOn = () => {
   addingTask.value = true
 }
-
 const turnAddingTaskOff = () => {
   addingTask.value = false
 }
@@ -187,11 +179,9 @@ const stageTasks = computed({
   },
 })
 
-const onTaskMove = (e: { added: { element: Task } }) => {
+const onTaskMove = (e: { added?: { element: Task } }) => {
   const added = e.added
-
   if (!added) return
-
   canbanStore.updateTaskOnMove({ ...added.element, stage_id: props.stage.id })
 }
 </script>

@@ -1,4 +1,12 @@
 export default function generateUniqueId(prefix: string = ''): string {
-  const currentDateString = new Date().toISOString().replace(/[^0-9]/g, '')
-  return prefix + currentDateString
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return prefix + crypto.randomUUID()
+  }
+
+  return (
+    prefix +
+    Date.now().toString(36) +
+    '-' +
+    Math.random().toString(36).slice(2, 10)
+  )
 }

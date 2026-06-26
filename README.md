@@ -1,94 +1,50 @@
+# Alnitak
 
-# Kovnisoft project (sotnikov) 📊
+Доска задач и аналитика выручки в одном рабочем пространстве. Single-page app на Nuxt 3, Tailwind и ECharts.
 
-Kanban system & Chart using Nuxt3 + TailwindCSS + Echart ✨
+## Что внутри
 
+- **Доска (Kanban)** - этапы и задачи с CRUD и перетаскиванием, состояние хранится в `localStorage`.
+- **Аналитика** - выручка, прибыль по продуктам и сравнение плана с фактом на ECharts. Данные демонстрационные, генерируются на клиенте.
+- Единая дизайн-система (OKLCH-токены, типографика, мотив "ledger rule"), доступность (landmarks, skip-link, фокус-ловушка в модалках, поддержка `prefers-reduced-motion`) и адаптивность от 390px.
+- E2E-тесты на Playwright для доски.
+- Docker-сборка фронтенда.
 
-## Features
+## Стек
 
-- Kanban -> stages, tasks CRUD + localStorage syncronization 🔄️
-- Charts with real time dynamic data ℹ️
-- Tests with `playwright` for Kanban ✅
-- Accessibility boosted 📈
-- Build frontend with docker 👍
+Nuxt 3 (`ssr: false`, SPA), Vue 3, Pinia, ECharts, vuedraggable, Luxon, Tailwind CSS 3, SCSS.
 
-## 🚀 About Me
-I'm a full stack developer...
-
-
-## Run Locally
-
-Clone the project
+## Запуск
 
 ```bash
-  git clone https://github.com/selimdev00/kovnisot-project.git
+npm install
+npm run dev
 ```
 
-Go to the project directory
+Прод-сборка статического сайта:
 
 ```bash
-  cd kovnisot-project
+npm run generate   # вывод в .output/public
 ```
 
-Install dependencies
+Docker:
 
 ```bash
-  npm install
+docker build -t alnitak .
+docker run -p 3000:3000 -d alnitak
 ```
 
-Start the server
+## Тесты
 
 ```bash
-  npm run dev
+npm run e2e        # Playwright
+npm run e2e:ui     # интерактивный режим
 ```
 
-*or*
+## Автор
 
-Build docker image
-
-```bash
-  docker build -t sotnikov-frontend .
-```
-
-Run docker container
-
-```bash
-  docker run -p 3000:3000 -d sotnikov-frontend
-```
-## Authors
-
-- [@selimdev](https://github.com/selimdev00)
-
-
-## Support
-
-For support, email selimdev00@gmail.com.
-
-
-## Running Tests (E2E)
-
-Tests are written in playwright, so there must be installed playwright on your host in order to run tests
-
-To run tests, you can run the following commands
-
-```bash
-  npm run e2e
-```
-
-```bash
-  npm run e2e:web
-```
-
-```bash
-  npm run e2e:ui
-```
+[@selimdev00](https://github.com/selimdev00)
 
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
-
-
-## Feedback
-
-If you have any feedback, please reach out to us at selimdev00@gmail.com
-

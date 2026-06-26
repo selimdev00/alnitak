@@ -1,79 +1,271 @@
+/* BRAND FONTS (self-hosted, variable) */
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/inter-tight';
+
 /* TAILWIND */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* SCROLLBAR STYLES */
+/* ============================================================
+   ALNITAK DESIGN TOKENS
+   Editorial operations console. Warm "paper" ground, ink text,
+   one committed clay accent, charts on warm-charcoal cards.
+   OKLCH only, tinted neutrals, no pure black / white.
+   ============================================================ */
+:root {
+  /* paper neutrals (warm, slight amber cast) */
+  --bg: oklch(0.985 0.006 75);
+  --surface-1: oklch(0.969 0.008 72);
+  --surface-2: oklch(0.936 0.011 70);
+  --surface-3: oklch(0.905 0.013 68);
+  --border: oklch(0.888 0.012 70);
+  --border-strong: oklch(0.82 0.015 66);
+
+  /* ink text on paper */
+  --text: oklch(0.27 0.012 55);
+  --text-muted: oklch(0.45 0.014 58);
+  --text-subtle: oklch(0.58 0.012 60);
+
+  /* committed accent: clay / terracotta */
+  --accent: oklch(0.585 0.158 40);
+  --accent-press: oklch(0.51 0.155 40);
+  --accent-weak: oklch(0.93 0.046 52);
+  --accent-ink: oklch(0.992 0.008 60);
+
+  /* warm-graphite "ink" surfaces for the dashboard cards
+     (kept a soft mid-charcoal so they sit calmly on the paper, not stark black) */
+  --ink: oklch(0.355 0.017 54);
+  --ink-2: oklch(0.41 0.019 54);
+  --ink-border: oklch(0.475 0.02 56);
+  --ink-text: oklch(0.97 0.006 80);
+  --ink-muted: oklch(0.82 0.013 72);
+  --ink-subtle: oklch(0.7 0.012 68);
+  --chart-grid: oklch(0.58 0.018 56 / 0.4);
+  --chart-axis: oklch(0.76 0.012 70);
+
+  /* semantic */
+  --success: oklch(0.66 0.13 150);
+  --warning: oklch(0.76 0.14 75);
+  --danger: oklch(0.57 0.18 25);
+  --danger-press: oklch(0.5 0.18 25);
+  --danger-weak: oklch(0.93 0.05 28);
+
+  /* chart series ramp (harmonized with clay, not default echarts) */
+  --series-1: oklch(0.66 0.16 42);
+  --series-2: oklch(0.79 0.13 78);
+  --series-3: oklch(0.72 0.11 158);
+  --series-4: oklch(0.66 0.09 242);
+  --series-5: oklch(0.64 0.13 332);
+
+  /* radius */
+  --radius-card: 14px;
+  --radius-control: 10px;
+  --radius-pill: 999px;
+
+  /* elevation (warm-tinted, not flat black) */
+  --shadow-sm: 0 1px 2px oklch(0.4 0.03 60 / 0.09);
+  --shadow-card: 0 6px 20px -8px oklch(0.4 0.03 60 / 0.16);
+  --shadow-pop: 0 16px 40px -12px oklch(0.34 0.04 54 / 0.26);
+
+  /* motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur: 220ms;
+  --dur-slow: 420ms;
+
+  --ring: var(--accent);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+html {
+  font-family: 'Inter Tight Variable', system-ui, sans-serif;
+  color: var(--text);
+  background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--bg);
+  /* signature "engineering ledger" paper: faint ruled grid */
+  background-image: linear-gradient(
+      to right,
+      oklch(0.82 0.02 65 / 0.16) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, oklch(0.82 0.02 65 / 0.16) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: -1px -1px;
+}
+
+/* tabular figures everywhere numbers matter */
+.tnum {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+
+.font-display {
+  font-family: 'Fraunces Variable', Georgia, serif;
+  font-optical-sizing: auto;
+}
+
+/* type scale helpers */
+.t-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+
+/* ============================================================
+   SIGNATURE: the "ledger rule"
+   A hairline accent cap + ticked divider that ties every
+   surface together.
+   ============================================================ */
+.ledger-card {
+  position: relative;
+  background-color: var(--surface-1);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+.ledger-card--ink {
+  background-color: var(--ink);
+  border-color: var(--ink-border);
+  border-top-color: var(--accent);
+  color: var(--ink-text);
+}
+
+/* ticked rule used as a section divider (accounting paper) */
+.ledger-rule {
+  height: 1px;
+  width: 100%;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--border-strong) 0,
+    var(--border-strong) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+/* ============================================================
+   FOCUS + A11Y
+   ============================================================ */
+:where(a, button, [tabindex], input, select, textarea):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.focus\:not-sr-only:focus,
+.focus-visible\:not-sr-only:focus-visible {
+  position: fixed;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
 ::-webkit-scrollbar {
-  @apply w-[8px] h-[8px];
+  width: 10px;
+  height: 10px;
 }
-
 ::-webkit-scrollbar-thumb {
-  @apply bg-blue-400 rounded;
+  background-color: var(--border-strong);
+  border-radius: var(--radius-pill);
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
-
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-subtle);
+}
 ::-webkit-scrollbar-track {
-  @apply bg-gray-200 rounded;
+  background-color: transparent;
 }
 
-/* VUE TRANSITION ANIMATIONS */
-.v {
-  &-enter-from {
-    @apply opacity-0;
-  }
-
-  &-enter-to {
-    @apply opacity-100;
-  }
-
-  &-enter-active {
-    @apply transition duration-300;
-  }
-}
-
+/* ============================================================
+   TRANSITIONS (page + lists)
+   ============================================================ */
 .fade {
   &-enter-active,
   &-leave-active {
-    transition: opacity 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    transition: opacity var(--dur) var(--ease-out-expo);
   }
-
-  &-enter-from,
-  &-leave-to {
-    @apply opacity-0;
-  }
-
-  &-enter-to,
-  &-leave-from {
-    @apply opacity-100;
-  }
-}
-
-.list {
-  &-enter-active,
-  &-leave-active {
-    @apply transition duration-100;
-  }
-
   &-enter-from,
   &-leave-to {
     opacity: 0;
-    transform: translateX(-100%);
   }
 }
 
-.list-fade-x {
-  &-move,
-  &-enter-active,
-  &-leave-active {
-    @apply transition duration-500;
+.rise {
+  &-enter-active {
+    transition: opacity var(--dur) var(--ease-out-expo),
+      transform var(--dur) var(--ease-out-expo);
   }
-
-  &-enter-from,
+  &-leave-active {
+    transition: opacity var(--dur-fast) var(--ease-out-expo);
+    position: absolute;
+  }
+  &-enter-from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
   &-leave-to {
-    @apply opacity-0 translate-x-full;
+    opacity: 0;
   }
+  &-move {
+    transition: transform var(--dur-slow) var(--ease-out-expo);
+  }
+}
 
-  &-leave-active {
-    @apply absolute;
+/* scroll-reveal (driven by IntersectionObserver) */
+.reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity var(--dur-slow) var(--ease-out-expo),
+    transform var(--dur-slow) var(--ease-out-expo);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
   }
 }

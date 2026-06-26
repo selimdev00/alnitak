@@ -1,14 +1,20 @@
 <template>
-  <div class="flex flex-col gap-1 w-full">
+  <div class="flex w-full flex-col gap-1.5">
+    <label :for="id" class="text-sm font-medium text-content-muted">
+      {{ label }}
+    </label>
+
     <select
       :id="id"
       :name="id"
       :value="modelValue"
-      class="w-full py-2 px-4 border-2 outline-none border-gray-300 rounded hover:text-blue-400 hover:border-blue-400 transition bg-white focus:border-blue-400"
-      :class="{ 'border-red-400': error }"
-      :placeholder="placeholder"
-      @input="handleInput"
+      class="w-full rounded-control border bg-bg px-3.5 py-2.5 text-content outline-none transition-colors duration-fast hover:border-accent focus:border-accent"
+      :class="error ? 'border-danger' : 'border-line-strong'"
+      @change="handleChange"
     >
+      <option v-if="placeholder" value="" disabled>
+        {{ placeholder }}
+      </option>
       <option
         v-for="option in options"
         :key="option.key"
@@ -19,16 +25,14 @@
       </option>
     </select>
 
-    <div class="flex justify-end">
-      <span class="text-xs text-red-400">{{ error }}</span>
-    </div>
+    <span v-if="error" class="text-xs text-danger">{{ error }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Option } from '~/types/FormSelect'
 
-defineProps<{
+const props = defineProps<{
   id: string
   label: string
   modelValue: string | number
@@ -39,7 +43,10 @@ defineProps<{
 
 const emit = defineEmits(['update:modelValue'])
 
-const handleInput = (event: Event) => {
-  emit('update:modelValue', (event.target as HTMLInputElement).value)
+const handleChange = (event: Event) => {
+  const raw = (event.target as HTMLSelectElement).value
+  // preserve numeric ids when the matched option carries a number value
+  const matched = props.options.find((o) => String(o.value) === raw)
+  emit('update:modelValue', matched ? matched.value : raw)
 }
 </script>

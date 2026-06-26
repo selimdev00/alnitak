@@ -29,6 +29,10 @@ export const useCanbanStore = defineStore('canban', () => {
     })
   }
 
+  const clearStages = () => {
+    stages.value = []
+  }
+
   const removeStage = (id: StageId) => {
     stages.value = stages.value.filter((stage) => stage.id !== id)
 
@@ -140,6 +144,7 @@ export const useCanbanStore = defineStore('canban', () => {
     stages,
     tasks,
     addStage,
+    clearStages,
     removeStage,
     updateStageTitle,
     addTask,

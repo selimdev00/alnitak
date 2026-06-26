@@ -1,14 +1,21 @@
 <template>
-  <div class="flex flex-col gap-4 text-white flex-1 gap-6 p-4">
-    <ChartsCategorySelector v-model="filter" :options="series" />
+  <div class="flex flex-1 flex-col gap-5 text-ink-text">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <p class="t-eyebrow !text-ink-subtle">По дням месяца</p>
+        <h2 class="mt-1 font-display text-xl font-semibold">План и факт</h2>
+      </div>
+      <ChartsCategorySelector v-model="filter" :options="series" />
+    </div>
 
-    <div :id="id" class="h-[400px] w-full" />
+    <div :id="id" class="h-[300px] w-full sm:h-[360px] lg:h-[400px]" />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { SeriesItem } from '~/types/Chart'
 import generateMockDataForChart from '~/helpers/generateMockDataForChart'
+import { cssVar, withAlpha } from '~/helpers/echartsTheme'
 import type { EChartsOption } from 'echarts/types/dist/shared'
 
 const filter = ref<string>('all')
@@ -20,23 +27,23 @@ const series: SeriesItem[] = [
     data: generateMockDataForChart({ length: 31, range: 600 }),
     name: 'План',
     type: 'line',
-    color: '#0077F7',
+    color: cssVar('--series-4'),
     areaStyle: {
-      color: 'rgba(24, 160, 251, 0.3)',
+      color: withAlpha('--series-4', 0.14),
     },
     symbol: 'circle',
-    symbolSize: 10,
+    symbolSize: 7,
   },
   {
     data: generateMockDataForChart({ length: 31, range: 600 }),
     name: 'Факт',
     type: 'line',
-    color: '#13D6FF',
+    color: cssVar('--series-1'),
     areaStyle: {
-      color: 'rgba(189, 255, 255, 0.7)',
+      color: withAlpha('--series-1', 0.16),
     },
     symbol: 'circle',
-    symbolSize: 10,
+    symbolSize: 7,
   },
 ]
 
@@ -46,21 +53,22 @@ const { loadChart, reloadChart } = useChart(props.id, {
       const dayNumber = index + 1
       return dayNumber.toString().padStart(2, '0')
     }),
+    axisLabel: {
+      interval: 'auto',
+      rotate: 45,
+    },
   },
   yAxis: {},
   grid: {
-    x: '1%',
-    x2: '1%',
+    left: '1%',
+    right: '1%',
   },
   tooltip: {
     trigger: 'axis',
     axisPointer: {
       type: 'line',
-      label: {
-        backgroundColor: '#6a7985',
-      },
       lineStyle: {
-        color: '#0077F7',
+        color: cssVar('--accent'),
       },
     },
   },

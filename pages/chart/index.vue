@@ -1,48 +1,57 @@
 <template>
-  <div
-    class="flex flex-col items-center bg-neutral-900 min-h-screen text-white gap-4"
-  >
-    <div class="relative flex w-full justify-center items-center p-4">
-      <nuxt-link
-        to="/"
-        class="cursor-pointer group absolute left-4 text-4xl w-12 h-12 flex items-center justify-center outline-none"
+  <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+    <header class="mb-8 max-w-2xl" v-reveal>
+      <p class="t-eyebrow">Аналитика</p>
+      <h1
+        class="mt-2 font-display text-3xl font-semibold tracking-tight text-content sm:text-4xl"
       >
-        <IconArrowBack class="z-10" />
+        Финансовая аналитика
+      </h1>
+      <p class="mt-3 leading-relaxed text-content-muted">
+        Выручка, прибыль по продуктам и сравнение плана с фактом.
+        <span class="text-content-subtle">Показаны демо-данные.</span>
+      </p>
+    </header>
 
-        <div
-          class="h-full w-full bg-neutral-700 rounded-full absolute top-0 left-0 scale-0 transition group-hover:scale-100 group-focus:scale-100 z-0"
-        />
-      </nuxt-link>
-
-      <h1 class="text-4xl font-bold uppercase">ECHART</h1>
-    </div>
-
-    <div v-if="isReady" class="p-4 flex flex-col gap-4 w-full">
-      <div class="flex flex-wrap gap-4">
-        <ChartsTotalIncome id="chart-1" />
-
-        <ChartsIncome id="chart-2" />
+    <Transition name="fade" mode="out-in">
+      <div v-if="!isReady" key="skeleton" class="flex flex-col gap-6">
+        <div class="grid gap-6 lg:grid-cols-[3fr_2fr]">
+          <div class="ledger-card ledger-card--ink h-[560px] animate-pulse" />
+          <div class="ledger-card ledger-card--ink h-[560px] animate-pulse" />
+        </div>
+        <div class="ledger-card ledger-card--ink h-[480px] animate-pulse" />
       </div>
 
-      <PlanFact id="chart-3" />
-    </div>
+      <div v-else key="charts" class="flex flex-col gap-6">
+        <div class="grid gap-6 lg:grid-cols-[3fr_2fr]">
+          <section class="ledger-card ledger-card--ink p-5 sm:p-7">
+            <ChartsTotalIncome id="chart-1" />
+          </section>
+
+          <section class="ledger-card ledger-card--ink p-5 sm:p-7">
+            <ChartsIncome id="chart-2" />
+          </section>
+        </div>
+
+        <section class="ledger-card ledger-card--ink p-5 sm:p-7">
+          <ChartsPlanFact id="chart-3" />
+        </section>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { registerTheme } from 'echarts'
-import theme from '~/assets/echarts-theme.json'
-import PlanFact from '~/components/Charts/PlanFact.vue'
-
 const isReady = ref<boolean>(false)
 
 useHead({
-  title: 'ECharts',
+  title: 'Финансовая аналитика — Alnitak',
 })
 
 onMounted(() => {
-  registerTheme('custom', theme)
-
-  isReady.value = true
+  // let the layout paint, then mount the charts so the skeleton reads
+  requestAnimationFrame(() => {
+    isReady.value = true
+  })
 })
 </script>

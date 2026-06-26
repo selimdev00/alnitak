@@ -1,44 +1,57 @@
 <template>
-  <div class="flex flex-col text-white flex-1 gap-6">
-    <h2 class="text-lg uppercase">Прибыль</h2>
+  <div class="flex flex-1 flex-col gap-5 text-ink-text">
+    <div>
+      <p class="t-eyebrow !text-ink-subtle">Цель {{ formatNumber(TARGET) }}</p>
+      <h2 class="mt-1 font-display text-xl font-semibold">Прибыль по продуктам</h2>
+    </div>
 
     <ChartsCategorySelector v-model="filter" :options="series" />
 
     <transition-group
       tag="div"
-      name="list-fade-x"
-      mode="out-in"
-      class="grid md:grid-cols-3 sm:grid-cols-2 gap-4"
+      name="rise"
+      class="grid gap-x-6 gap-y-4 sm:grid-cols-2"
     >
       <div
         v-for="item in filteredSeries"
         :key="item.name"
-        class="flex flex-col gap-3 border-r border-gray-800 last:border-0 md:pl-4 first:pl-0"
+        class="flex flex-col gap-2"
       >
-        <span class="text-xl text-gray-400">{{ item.name }}</span>
+        <span class="flex items-center gap-2 text-sm text-ink-muted">
+          <span
+            class="block h-2 w-2 rounded-full"
+            :style="{ backgroundColor: item.color }"
+          />
+          {{ item.name }}
+        </span>
 
-        <div class="flex flex-col">
-          <span class="text-xl text-white font-semibold">
-            {{ item.totalDataValue }}
-          </span>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl font-semibold tnum">{{
+            formatNumber(item.totalDataValue || 0)
+          }}</span>
+          <span class="text-sm text-ink-subtle tnum"
+            >из {{ formatNumber(TARGET) }}</span
+          >
+        </div>
 
-          <span class="text-gray-500 text-lg">/ 2.000</span>
-
-          <div class="flex items-center text-lime-200 gap-3">
-            <div class="h-[2px] w-[160px] bg-gray-700">
-              <div
-                class="h-full bg-lime-200"
-                :style="`width: ${item.percentage}%`"
-              />
-            </div>
-
-            <span>{{ item.percentage }}%</span>
+        <div class="flex items-center gap-3">
+          <div class="h-1.5 flex-1 overflow-hidden rounded-pill bg-ink-2">
+            <div
+              class="h-full rounded-pill"
+              :style="{
+                width: `${item.percentage}%`,
+                backgroundColor: item.color,
+              }"
+            />
           </div>
+          <span class="w-10 text-right text-sm font-medium tnum"
+            >{{ item.percentage }}%</span
+          >
         </div>
       </div>
     </transition-group>
 
-    <div :id="id" class="h-[380px]" />
+    <div :id="id" class="h-[260px] w-full sm:h-[340px] lg:h-[380px]" />
   </div>
 </template>
 
@@ -48,7 +61,11 @@ import { useChart } from '~/composables/useChart'
 
 import generateMockDataForChart from '~/helpers/generateMockDataForChart'
 import returnDataTotalValue from '~/helpers/returnDataTotalValue'
+import { formatNumber } from '~/helpers/formatRub'
+import { cssVar } from '~/helpers/echartsTheme'
 import type { EChartsOption } from 'echarts/types/dist/shared'
+
+const TARGET = 2000
 
 const props = defineProps<{ id: string }>()
 
@@ -58,20 +75,20 @@ const series: SeriesItem[] = [
     name: 'Продукт 1',
     type: 'bar',
     stack: 'x',
-    color: '#0077F7',
+    color: cssVar('--series-1'),
   },
   {
     data: generateMockDataForChart({ length: 2, range: 2000 }),
     name: 'Продукт 2',
     type: 'bar',
     stack: 'x',
-    color: '#13D6FF',
+    color: cssVar('--series-4'),
   },
 ]
 
 for (const item of series) {
   item.totalDataValue = returnDataTotalValue(item.data)
-  item.percentage = ((item.totalDataValue / 2000) * 100).toFixed(0)
+  item.percentage = ((item.totalDataValue / TARGET) * 100).toFixed(0)
 }
 
 const filter = ref<string>('all')
@@ -85,13 +102,6 @@ const filteredSeries = computed<SeriesItem[]>(() => {
 const { loadChart, reloadChart } = useChart(props.id, {
   yAxis: {
     data: ['Факт', 'План'],
-
-    splitLine: {
-      show: true,
-      lineStyle: {
-        color: ['#292829'],
-      },
-    },
   },
   xAxis: {
     splitLine: {

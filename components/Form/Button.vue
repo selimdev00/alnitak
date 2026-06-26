@@ -1,7 +1,7 @@
 <template>
   <button
     ref="button"
-    class="whitespace-nowrap"
+    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-control text-sm font-semibold transition-all duration-fast ease-out-expo active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
     :class="classes[variant || 'primary']"
   >
     <slot />
@@ -13,16 +13,14 @@ defineProps<{
   variant?: string
 }>()
 
-const classes = computed<{ [key: string]: string }>(() => {
-  return {
-    primary:
-      'flex items-center justify-center gap-2 py-2 px-4 border-2 border-blue-400 bg-blue-400 text-white rounded transition w-full hover:bg-blue-500 outline-none focus:text-blue-400 focus:border-blue-400 focus:bg-white',
-    danger:
-      'flex items-center justify-center gap-2 py-2 px-4 border-2 border-red-600 bg-red-600 text-white  text-red-600 rounded transition w-full hover:bg-red-600 outline-none hover:text-white focus:text-red-600 focus:border-red-600 focus:bg-white',
-    secondary:
-      'flex items-center justify-between gap-2 p-4 border-2 border-gray-300 rounded text-gray-400 hover:text-blue-400 hover:border-blue-400 outline-none transition bg-white  focus:text-blue-400 focus:border-blue-400',
-  }
-})
+const classes: Record<string, string> = {
+  primary:
+    'px-4 py-2.5 bg-accent text-accent-ink shadow-sm hover:bg-accent-press',
+  danger: 'px-4 py-2.5 bg-danger text-accent-ink shadow-sm hover:bg-danger-press',
+  secondary:
+    'px-4 py-2.5 border border-line-strong bg-surface-1 text-content hover:border-accent hover:text-accent',
+  ghost: 'px-4 py-2.5 text-content-muted hover:bg-surface-2 hover:text-content',
+}
 
 const button = ref<HTMLButtonElement | null>(null)
 defineExpose({ button })

@@ -1,111 +1,92 @@
 <template>
-  <div class="p-4 flex flex-col items-start gap-4">
-    <div class="flex items-center gap-4">
-      <nuxt-link to="/" class="p-2 outline-none group">
-        <div
-          class="group inline-block flex justify-center items-center cursor-pointer"
+  <div class="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
+    <div class="flex items-center gap-3" v-reveal>
+      <AppBackLink to="/kanban" label="К доске" />
+      <div>
+        <p class="t-eyebrow">Задача</p>
+        <h1
+          class="font-display text-2xl font-semibold tracking-tight text-content sm:text-3xl"
         >
-          <IconArrowBack class="z-10" />
-
-          <span
-            class="transition scale-0 group-hover:scale-100 group-focus:scale-100 absolute bg-blue-200 text-white w-[30px] h-[30px] rounded-full z-0"
-          />
-        </div>
-      </nuxt-link>
-
-      <h1 class="text-3xl font-bold">
-        {{ task.title }}
-      </h1>
+          {{ task.title }}
+        </h1>
+      </div>
     </div>
 
-    <div class="w-full grid grid-cols-[3fr_10fr] gap-4">
-      <div
-        class="p-4 bg-white rounded transition border border-gray-300 hover:border-blue-400 cursor-pointer relative"
-      >
-        <div>
-          Task name:
+    <div class="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-[2fr_3fr]">
+      <section class="ledger-card p-5">
+        <p class="t-eyebrow">Сведения</p>
+        <dl class="mt-4 flex flex-col gap-3 text-sm">
+          <div class="flex flex-col gap-0.5">
+            <dt class="text-content-subtle">Название</dt>
+            <dd class="font-medium text-content">{{ task.title }}</dd>
+          </div>
+          <div v-if="task.description" class="flex flex-col gap-0.5">
+            <dt class="text-content-subtle">Описание</dt>
+            <dd class="text-content">{{ task.description }}</dd>
+          </div>
+          <div v-if="stage" class="flex flex-col gap-0.5">
+            <dt class="text-content-subtle">Этап</dt>
+            <dd>
+              <span
+                class="inline-flex items-center rounded-pill bg-accent-weak px-2.5 py-0.5 font-medium text-accent"
+              >
+                {{ stage.title }}
+              </span>
+            </dd>
+          </div>
+          <div class="ledger-rule my-1" />
+          <div class="flex justify-between gap-4">
+            <dt class="text-content-subtle">Создана</dt>
+            <dd class="text-content tnum">{{ formatDate(task.created_at) }}</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-content-subtle">Обновлена</dt>
+            <dd class="text-content tnum">{{ formatDate(task.updated_at) }}</dd>
+          </div>
+        </dl>
+      </section>
 
-          <span>{{ task.title }}</span>
-        </div>
-
-        <div>
-          Description:
-
-          <span>{{ task.description }}</span>
-        </div>
-
-        <div v-if="stage">
-          Stage:
-
-          <span>{{ stage.title }}</span>
-        </div>
-
-        <div>
-          Created at:
-
-          <span>{{
-            DateTime.fromISO(task.created_at).toFormat('dd LLL yyyy')
-          }}</span>
-        </div>
-
-        <div>
-          Updated at:
-
-          <span>{{
-            DateTime.fromISO(task.updated_at).toFormat('dd LLL yyyy')
-          }}</span>
-        </div>
-      </div>
-
-      <div
-        class="p-4 bg-white rounded transition border border-gray-300 hover:border-blue-400 cursor-pointer relative w-full"
-      >
-        <form class="flex flex-col gap-2" @submit.prevent="updateTask">
+      <section class="ledger-card p-5">
+        <p class="t-eyebrow">Редактирование</p>
+        <form class="mt-4 flex flex-col gap-4" @submit.prevent="updateTask">
           <FormInput
             id="title"
             v-model="task.title"
             type="text"
-            label="Title"
+            label="Название"
           />
-
           <FormInput
             id="description"
             v-model="task.description"
             type="textarea"
-            label="Description"
+            label="Описание"
           />
-
           <FormSelect
             id="stage_id"
             v-model="task.stage_id"
-            label="Stage"
+            label="Этап"
             :options="stageOptions"
-            placeholder="Select stage"
+            placeholder="Выберите этап"
           />
 
-          <div class="self-end flex items-center gap-2">
-            <FormButton type="submit" role="button" alt="Save">
-              Save
+          <div class="flex flex-wrap justify-end gap-3">
+            <FormButton variant="danger" type="button" @click="removeTask">
+              <IconTrash />
+              Удалить
             </FormButton>
-
-            <FormButton
-              variant="danger"
-              role="button"
-              alt="Delete task"
-              @click.prevent="removeTask"
-            >
-              Delete task
+            <FormButton type="submit" variant="primary">
+              Сохранить
             </FormButton>
           </div>
         </form>
-      </div>
+      </section>
     </div>
 
     <teleport to="body">
       <ModalConfirm
         :is-revealed="isRevealed"
-        title="Are you sure to delete this task?"
-        text="You won't be able to undo this action"
+        title="Удалить задачу?"
+        text="Это действие нельзя отменить."
         @confirm="confirm"
         @cancel="cancel"
       />
@@ -128,28 +109,30 @@ const task = ref<UpdateTaskDTO>(
   Object.assign({}, canbanStore.findTask(route.params.id as string)),
 )
 if (!task.value.id) {
-  throw createError({ statusCode: 404, statusMessage: 'Task not found' })
+  throw createError({ statusCode: 404, statusMessage: 'Задача не найдена' })
 }
 
-const stage = ref<Stage | null>(canbanStore.findStage(task.value.stage_id))
+const stage = computed<Stage | null>(() =>
+  canbanStore.findStage(task.value.stage_id),
+)
+
+const formatDate = (iso: string) =>
+  DateTime.fromISO(iso).setLocale('ru').toFormat('dd LLL yyyy')
 
 const updateTask = () => {
   canbanStore.updateTask(task.value)
-
   return navigateTo('/kanban')
 }
 
 const handleGoBack = (e: KeyboardEvent) => {
-  if (e.key === 'Esc') {
+  if (e.key === 'Escape') {
     return navigateTo('/kanban')
   }
 }
 
-const stageOptions = computed<Option[]>(() => {
-  return canbanStore.stages.map((e: Stage) => {
-    return { key: e.title, value: e.id }
-  })
-})
+const stageOptions = computed<Option[]>(() =>
+  canbanStore.stages.map((e: Stage) => ({ key: e.title, value: e.id })),
+)
 
 const removeTask = () => {
   reveal()
@@ -169,6 +152,6 @@ onUnmounted(() => {
 })
 
 useHead({
-  title: `Kanban | ${task.value.title}`,
+  title: `${task.value.title} — Alnitak`,
 })
 </script>

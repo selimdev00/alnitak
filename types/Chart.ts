@@ -12,6 +12,9 @@ export type SeriesItem = {
   }
   symbol?: string
   symbolSize?: number
+  emphasis?: {
+    disabled?: boolean
+  }
 }
 
 type FormatterOption = {

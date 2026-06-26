@@ -1,30 +1,21 @@
 <template>
-  <div class="h-full relative flex flex-col justify-center">
-    <div class="absolute top-0 flex justify-center items-center w-full">
-      <button
-        class="absolute left-0 group inline-block flex items-center justify-center cursor-pointer outline-blue-400 p-2"
-        @click="emit('close')"
-      >
-        <IconArrowBack class="z-10" />
-
-        <span
-          class="transition scale-0 group-hover:scale-100 absolute bg-blue-200 text-white w-[30px] h-[30px] rounded-full z-0"
-        />
-      </button>
-
-      <h3 class="text-lg font-bold">Add task</h3>
+  <div class="flex flex-col gap-3">
+    <div class="flex items-center gap-2">
+      <UiIconButton label="Назад" class="!h-9 !w-9" @click="emit('close')">
+        <IconArrowBack />
+      </UiIconButton>
+      <h3 class="font-display text-base font-semibold text-content">
+        Новая задача
+      </h3>
     </div>
 
-    <form
-      class="flex flex-col justify-center items-center gap-2 h-full"
-      @submit.prevent="addTask"
-    >
+    <form class="flex flex-col gap-3" @submit.prevent="addTask">
       <FormInput
         id="title"
         ref="titleRef"
         v-model="payload.title"
-        label="Name"
-        placeholder="Task name"
+        label="Название"
+        placeholder="Что нужно сделать"
         type="text"
         :error="errors.title"
       />
@@ -32,14 +23,15 @@
       <FormInput
         id="description"
         v-model="payload.description"
-        label="Description"
-        placeholder="Task description"
+        label="Описание"
+        placeholder="Детали задачи"
         type="textarea"
         :error="errors.description"
       />
 
-      <FormButton type="submit" variant="primary">
-        <IconPlusCircle /> Add task
+      <FormButton type="submit" variant="primary" class="w-full">
+        <IconPlusCircle />
+        Добавить задачу
       </FormButton>
     </form>
   </div>
@@ -71,13 +63,14 @@ const addTask = () => {
   errors.value.title = ''
   errors.value.description = ''
 
-  if (!payload.value.title) {
-    errors.value.title = 'Title is required'
+  if (!payload.value.title.trim()) {
+    errors.value.title = 'Введите название'
+  }
+  if (!payload.value.description.trim()) {
+    errors.value.description = 'Добавьте описание'
   }
 
-  if (!payload.value.description) {
-    errors.value.description = 'Description is required'
-
+  if (!payload.value.title.trim() || !payload.value.description.trim()) {
     return
   }
 

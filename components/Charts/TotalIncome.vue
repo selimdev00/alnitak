@@ -1,55 +1,38 @@
 <template>
-  <div class="flex flex-col text-white flex-1 h-full w-full">
-    <h2 class="text-lg uppercase">ОБЩАЯ ВЫРУЧКА</h2>
+  <div class="flex h-full w-full flex-col gap-5 text-ink-text">
+    <div>
+      <p class="t-eyebrow !text-ink-subtle">Динамика по месяцам</p>
+      <h2 class="mt-1 font-display text-xl font-semibold">Общая выручка</h2>
+    </div>
 
-    <div class="flex flex-wrap items-center w-full">
-      <div
-        class="group p-4 flex-1 flex flex-col gap-1 min-w-[200px] relative justify-center"
-      >
-        <h3
-          class="font-medium text-gray-500 uppercase flex gap-2 items-center text-xl"
-        >
-          Общее оплачено
-        </h3>
-
-        <p class="text-2xl mt-2 font-semibold">
-          {{ total }}
-        </p>
-
-        <div
-          class="bg-neutral-800 w-[1px] h-[68px] absolute left-0 group-first:hidden"
-        />
+    <div class="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+      <div class="flex flex-col gap-1">
+        <span class="text-sm text-ink-muted">Всего оплачено</span>
+        <span class="text-xl font-semibold tnum sm:text-2xl">{{
+          formatRub(totalValue)
+        }}</span>
       </div>
 
       <div
         v-for="item in sections"
         :key="item.name"
-        class="group p-4 flex-1 flex flex-col gap-1 min-w-[200px] relative justify-center"
+        class="flex flex-col gap-1"
       >
-        <h3
-          class="font-medium text-gray-500 uppercase flex gap-2 items-center text-xl"
-        >
+        <span class="flex items-center gap-2 text-sm text-ink-muted">
           <span
             v-if="item.color"
-            class="block h-1 w-1 rounded-full border-[1px] border-opacity-90 border-gray-600"
-            :style="`background-color: ${item.color}`"
+            class="block h-2 w-2 rounded-full"
+            :style="{ backgroundColor: item.color }"
           />
-
           {{ item.name }}
-        </h3>
-
-        <p class="text-2xl mt-2 font-semibold">
-          {{ (returnDataTotalValue(item.data) * 10000).toLocaleString() }}
-          ₽
-        </p>
-
-        <div
-          class="bg-neutral-800 w-[1px] h-[68px] absolute left-0 group-first:hidden"
-        />
+        </span>
+        <span class="text-xl font-semibold tnum">{{
+          formatRub(returnDataTotalValue(item.data) * SCALE)
+        }}</span>
       </div>
     </div>
 
-    <div :id="id" class="h-[500px] w-full" />
+    <div :id="id" class="h-[300px] w-full sm:h-[420px] lg:h-[500px]" />
   </div>
 </template>
 
@@ -59,6 +42,10 @@ import type { EChartsOption } from 'echarts/types/dist/shared'
 
 import generateMockDataForChart from '~/helpers/generateMockDataForChart'
 import returnDataTotalValue from '~/helpers/returnDataTotalValue'
+import { formatRub } from '~/helpers/formatRub'
+import { cssVar } from '~/helpers/echartsTheme'
+
+const SCALE = 10000
 
 const props = defineProps<{ id: string }>()
 
@@ -68,36 +55,35 @@ const series: SeriesItem[] = [
     type: 'bar',
     data: generateMockDataForChart({ length: 12, range: 500 }),
     stack: 'x',
-    color: '#13D6FF',
+    color: cssVar('--series-1'),
   },
   {
-    name: 'ЗП',
+    name: 'Зарплаты',
     type: 'bar',
     data: generateMockDataForChart({ length: 12, range: 500 }),
     stack: 'x',
-    color: '#0077F7',
+    color: cssVar('--series-4'),
   },
   {
-    name: 'Мясо',
+    name: 'Сырьё',
     type: 'bar',
     data: generateMockDataForChart({ length: 12, range: 500 }),
     stack: 'x',
-    color: '#9747FF',
+    color: cssVar('--series-3'),
   },
   {
     data: generateMockDataForChart({ length: 12, range: 500 }),
     type: 'line',
     smooth: true,
-    color: '#C6EC92',
+    color: cssVar('--series-2'),
   },
 ]
 
 const sections: SeriesItem[] = series.filter((e) => e.name)
 
-const total = computed<string>(() => {
-  const total = sections.reduce((a, b) => a + returnDataTotalValue(b.data), 0)
-  return (total * 10000).toLocaleString() + ' ₽'
-})
+const totalValue = computed<number>(() =>
+  sections.reduce((a, b) => a + returnDataTotalValue(b.data), 0) * SCALE,
+)
 
 const { loadChart } = useChart(props.id, {
   xAxis: {
